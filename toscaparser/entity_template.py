@@ -132,7 +132,7 @@ class EntityTemplate(object):
                 capabilities = self.type_definition.get_capabilities()
                 if name in capabilities.keys():
                     c = capabilities[name]
-                    cap = Capability(name, props['properties'], c)
+                    cap = Capability(name, props['properties'], c, self.custom_def)
                     capability.append(cap)
         return capability
 
