@@ -91,15 +91,28 @@ class DataEntity(object):
             for name, value in list(self.value.items()):
                 prop_schema = Schema(name, self._find_schema(name))
                 # check if field value meets type defined
-                DataEntity.validate_datatype(prop_schema.type, value,
-                                             prop_schema.entry_schema,
-                                             self.custom_def)
-                # check if field value meets constraints defined
-                if prop_schema.constraints:
-                    for constraint in prop_schema.constraints:
-                        constraint.validate(value)
+                if not self._is_function(value):
+                    DataEntity.validate_datatype(prop_schema.type, value,
+                                                 prop_schema.entry_schema,
+                                                 self.custom_def)
+                    # check if field value meets constraints defined
+                    if prop_schema.constraints:
+                        for constraint in prop_schema.constraints:
+                            constraint.validate(value)
 
         return self.value
+
+    def _is_function(self, value):
+        '''Determine if the value is a TOSCA function.
+
+        FIXME: Reimplemented here as the functions.is_function would cause a
+        cyclic import issue.
+        '''
+        if isinstance(value, dict) and len(value) == 1:
+            func_name = list(value.keys())[0]
+            return func_name in ['get_property', 'get_input', 'get_attribute']
+        else:
+            return False
 
     def _find_schema(self, name):
         if self.schema and name in self.schema.keys():
